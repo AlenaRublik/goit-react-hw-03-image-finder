@@ -7,6 +7,7 @@ import { fetchPictures } from '../services/pixabayAPI';
 import { perPage } from '../services/pixabayAPI';
 import { Button } from './Button/Button';
 import Loader from './Loader/Loader';
+import { Text } from './Text/Text';
 
 export class App extends Component {
   state = {
@@ -86,6 +87,7 @@ handleSearch = searchQuery => {
         {pictures.length > 0 && loadMore && !error && (
           <Button onClick={this.handleLoadMore} />
         )}
+           {error && !loading && <Text>{error}</Text>}
         {loading && <Loader />}
         <ToastContainer />
       </>
