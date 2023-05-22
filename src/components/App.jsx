@@ -2,6 +2,9 @@ import { Component } from 'react';
 
 import { ToastContainer, toast } from 'react-toastify';
 import SearchBar from './SearchBar/SearchBar';
+import ImageGallery from './ImageGallery/ImageGallery';
+import { fetchPictures } from '../services/pixabayAPI';
+import { perPage } from '../services/pixabayAPI';
 
 
 export class App extends Component {
@@ -13,7 +16,41 @@ export class App extends Component {
     loadMore: false,
     error: '',
   };
-
+  async componentDidUpdate(_, prevState) {
+    if (
+      prevState.searchQuery !== this.state.searchQuery ||
+      prevState.page !== this.state.page
+    ) {
+      try {
+        this.setState({ loading: true, loadMore: true });
+        const res = await fetchPictures(
+          this.state.searchQuery,
+          this.state.page
+        );
+        this.setState({
+          pictures:
+            prevState.searchQuery !== this.state.searchQuery
+              ? res.hits
+              : [...prevState.pictures, ...res.hits],
+        });
+        if (res.total === 0) {
+          throw new Error('Sorry, no images found');
+        }
+        if (res.totalHits <= this.state.page * perPage) {
+          this.setState({
+            loadMore: false,
+          });
+        }
+      } catch (error) {
+        this.setState({ error: error.message });
+      } finally {
+        this.setState({ loading: false });
+      }
+    }
+  }
+  onError = () => {
+    this.setState({ error: true, loading: false, loadMore: false });
+  };
 
 handleSearch = searchQuery => {
     const initialStateParams = {
@@ -22,7 +59,7 @@ handleSearch = searchQuery => {
       error: '',
       loadMore: false,
     };
-
+  
     if (searchQuery === this.state.searchQuery) {
       toast.error(
         'The same request. Change your request'
@@ -38,7 +75,8 @@ handleSearch = searchQuery => {
     return (
       <>
         <SearchBar handleSearch={this.handleSearch} />
-      <ToastContainer/>
+      {pictures.length > 0 && !error && <ImageGallery pictures={pictures} />}
+        <ToastContainer />
       </>
     );
   }
