@@ -5,10 +5,13 @@ import {
   GalleryImg,
   LiItem,
 } from './ImageGalleryItem.styled';
+import { Modal } from 'components/Modal/Modal';
 import PropTypes from 'prop-types';
 
 export class ImageGalleryItem extends Component {
-
+  state = {
+    isShowModal: false,
+  };
   static propTypes = {
     image: PropTypes.shape({
       webformatURL: PropTypes.string.isRequired,
@@ -16,7 +19,13 @@ export class ImageGalleryItem extends Component {
     }).isRequired,
   };
 
+  handleModalOpen = () => {
+    this.setState({ isShowModal: true });
+  };
 
+  handleModalClose = () => {
+    this.setState({ isShowModal: false });
+  };
   render() {
     const image = this.props.image;
 
@@ -27,8 +36,16 @@ export class ImageGalleryItem extends Component {
               src={image.webformatURL}
               alt={image.tags}
               loading="lazy"
+              onClick={this.handleModalOpen}
             />
         </LiItem>
+        {this.state.isShowModal && (
+          <Modal
+            largeImageURL={image.largeImageURL}
+            tags={image.tags}
+            onClose={this.handleModalClose}
+          />
+        )}
       </>
     );
   }
